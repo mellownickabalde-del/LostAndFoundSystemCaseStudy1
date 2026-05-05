@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lost & Found — Dashboard</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="navbar__brand">Lost &amp; <span>Found</span></div>
+    <div class="navbar__spacer"></div>
+    <div class="navbar__actions">
+      <div id="userInfo"></div>
+      <button id="openProfileBtn" class="btn btn--outline btn--sm">👤 Profile</button>
+      <a href="/chat.html" class="btn btn--outline btn--sm" id="chatNavBtn">💬 <span id="chatBadge"></span>Messages</a>
+      <a id="adminLink" href="/admin.html" class="btn btn--outline btn--sm" style="display:none;">⚙️ Admin</a>
+      <button id="logoutBtn" class="btn btn--danger btn--sm">Sign Out</button>
+    </div>
+  </nav>
+
+  <div class="page-layout">
+
+    <!-- Sidebar: Report Form -->
+    <aside class="sidebar">
+      <div class="sidebar__title">📝 Report an Item</div>
+      <form id="reportForm" class="sidebar-form" autocomplete="off">
+        <div class="form-group">
+          <label class="form-label">Item Title</label>
+          <input type="text" id="itemTitle" class="form-input" placeholder="e.g. Black Umbrella" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Type</label>
+          <select id="itemType" class="form-select" required>
+            <option value="">— Select —</option>
+            <option value="lost">🔴 I Lost This</option>
+            <option value="found">🟢 I Found This</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Category</label>
+          <select id="itemCategory" class="form-select">
+            <option value="Other">Other</option>
+            <option value="Electronics">Electronics</option>
+            <option value="Clothing">Clothing</option>
+            <option value="Accessories">Accessories</option>
+            <option value="Documents">Documents</option>
+            <option value="Keys">Keys</option>
+            <option value="Wallet/Bag">Wallet / Bag</option>
+            <option value="Pet">Pet</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Location</label>
+          <input type="text" id="itemLocation" class="form-input" placeholder="e.g. Library, Room 204" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Date Lost / Found</label>
+          <input type="date" id="itemDate" class="form-input" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Description</label>
+          <textarea id="itemDesc" class="form-textarea" placeholder="Color, brand, distinguishing features…" required></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Upload Image</label>
+          <div class="upload-zone">
+            <input type="file" id="itemImageFile" accept="image/*" class="upload-input" />
+            <label for="itemImageFile" class="upload-label">
+              <span class="upload-icon">📷</span>
+              <span>Click to upload image</span>
+              <span class="upload-hint">JPG, PNG, GIF up to 5MB</span>
+            </label>
+          </div>
+          <div id="imagePreview" class="image-preview"></div>
+        </div>
+        <button type="submit" class="btn btn--primary btn--full">Report Item</button>
+      </form>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-card__value" id="statLost" style="color:var(--lost);">—</div>
+          <div class="stat-card__label">Lost</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card__value" id="statFound" style="color:var(--found);">—</div>
+          <div class="stat-card__label">Found</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card__value" id="statOpen" style="color:var(--accent);">—</div>
+          <div class="stat-card__label">Open</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card__value" id="statClaimed">—</div>
+          <div class="stat-card__label">Claimed</div>
+        </div>
+      </div>
+
+      <div class="filter-bar">
+        <select id="filterType" class="form-select">
+          <option value="">All Types</option>
+          <option value="lost">🔴 Lost</option>
+          <option value="found">🟢 Found</option>
+        </select>
+        <select id="filterStatus" class="form-select">
+          <option value="">All Statuses</option>
+          <option value="open">Open</option>
+          <option value="claimed">Claimed</option>
+          <option value="resolved">Resolved</option>
+        </select>
+        <select id="filterCategory" class="form-select">
+          <option value="">All Categories</option>
+          <option value="Electronics">Electronics</option>
+          <option value="Clothing">Clothing</option>
+          <option value="Accessories">Accessories</option>
+          <option value="Documents">Documents</option>
+          <option value="Keys">Keys</option>
+          <option value="Wallet/Bag">Wallet / Bag</option>
+          <option value="Pet">Pet</option>
+          <option value="Other">Other</option>
+        </select>
+        <input type="search" id="searchItems" class="form-input filter-search" placeholder="🔍  Search title, location, description…" />
+        <label class="checkbox-group" style="white-space:nowrap;">
+          <input type="checkbox" id="mineOnly" />
+          <span class="checkbox-label">My Items</span>
+        </label>
+      </div>
+
+      <div class="items-grid" id="itemsGrid"></div>
+      <div class="pagination" id="pagination"></div>
+
+    </main>
+  </div>
+
+  <!-- Detail Modal -->
+  <div id="detailModal" class="modal">
+    <div class="modal__box modal__box--wide">
+      <div class="modal__header">
+        <span class="modal__title">📦 Item Details</span>
+        <button id="closeDetailModal" class="modal__close">✕</button>
+      </div>
+      <div class="modal__body" id="detailContent"></div>
+    </div>
+  </div>
+
+  <!-- Edit Item Modal -->
+  <div id="itemModal" class="modal">
+    <div class="modal__box">
+      <div class="modal__header">
+        <span class="modal__title">✏️ Edit Item</span>
+        <button id="closeItemModal" class="modal__close">✕</button>
+      </div>
+      <form id="editItemForm">
+        <div class="modal__body">
+          <input type="hidden" id="editItemId" />
+          <input type="hidden" id="editUploadedUrl" />
+          <div class="form-group">
+            <label class="form-label">Title</label>
+            <input type="text" id="editItemTitle" class="form-input" required />
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Type</label>
+              <select id="editItemType" class="form-select">
+                <option value="lost">Lost</option>
+                <option value="found">Found</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Status</label>
+              <select id="editItemStatus" class="form-select">
+                <option value="open">Open</option>
+                <option value="claimed">Claimed</option>
+                <option value="resolved">Resolved</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Category</label>
+              <select id="editItemCategory" class="form-select">
+                <option value="Other">Other</option>
+                <option value="Electronics">Electronics</option>
+                <option value="Clothing">Clothing</option>
+                <option value="Accessories">Accessories</option>
+                <option value="Documents">Documents</option>
+                <option value="Keys">Keys</option>
+                <option value="Wallet/Bag">Wallet / Bag</option>
+                <option value="Pet">Pet</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Location</label>
+              <input type="text" id="editItemLocation" class="form-input" required />
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Description</label>
+            <textarea id="editItemDesc" class="form-textarea" required></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Replace Image</label>
+            <div class="upload-zone upload-zone--sm">
+              <input type="file" id="editItemImageFile" accept="image/*" class="upload-input" />
+              <label for="editItemImageFile" class="upload-label">
+                <span>📷 Click to replace image</span>
+              </label>
+            </div>
+            <div id="editImagePreview" class="image-preview"></div>
+          </div>
+        </div>
+        <div class="modal__footer">
+          <button type="button" class="btn btn--outline" onclick="document.getElementById('itemModal').classList.remove('modal--visible')">Cancel</button>
+          <button type="submit" class="btn btn--primary">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Profile Modal -->
+  <div id="profileModal" class="modal">
+    <div class="modal__box">
+      <div class="modal__header">
+        <span class="modal__title">👤 Edit Profile</span>
+        <button id="closeProfileModal" class="modal__close">✕</button>
+      </div>
+      <form id="profileForm">
+        <div class="modal__body">
+          <div class="form-group">
+            <label class="form-label">Full Name</label>
+            <input type="text" id="profileName" class="form-input" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Email Address</label>
+            <input type="email" id="profileEmail" class="form-input" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">New Password <span style="color:var(--text-muted);font-weight:400;">(leave blank to keep current)</span></label>
+            <input type="password" id="profilePassword" class="form-input" placeholder="Min. 6 characters" minlength="6" />
+          </div>
+        </div>
+        <div class="modal__footer">
+          <button type="button" class="btn btn--outline" onclick="document.getElementById('profileModal').classList.remove('modal--visible')">Cancel</button>
+          <button type="submit" class="btn btn--primary">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="/js/app.js"></script>
+  <script src="/js/items.js"></script>
+</body>
+</html>

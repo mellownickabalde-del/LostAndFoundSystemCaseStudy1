@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lost & Found — Admin</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="navbar__brand">Lost &amp; <span>Found</span></div>
+    <span style="font-size:0.78rem;color:var(--text-muted);font-family:var(--font-mono);">Admin Panel</span>
+    <div class="navbar__spacer"></div>
+    <div class="navbar__actions">
+      <div id="userInfo"></div>
+      <a href="/dashboard.html" class="btn btn--outline btn--sm">📋 Items</a>
+      <button id="logoutBtn" class="btn btn--danger btn--sm">Sign Out</button>
+    </div>
+  </nav>
+
+  <!-- Tabs -->
+  <div class="tabs-bar">
+    <button class="tab-btn tab-btn--active" data-tab="usersPanel">👥 Users</button>
+    <button class="tab-btn" data-tab="statsPanel">📊 Statistics & Export</button>
+    <button class="tab-btn" data-tab="logsPanel">📋 Activity Log</button>
+
+  </div>
+
+  <!-- ── USERS TAB ─────────────────────────────────────────────────────────── -->
+  <div id="usersPanel" class="tab-panel tab-panel--active">
+    <div class="admin-layout">
+      <!-- Left: Table -->
+      <div>
+        <div class="stats-row" style="margin-bottom:24px;">
+          <div class="stat-card">
+            <div class="stat-card__value" id="statTotal">—</div>
+            <div class="stat-card__label">Total Users</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card__value" id="statAdmins">—</div>
+            <div class="stat-card__label">Admins</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card__value" id="statActive">—</div>
+            <div class="stat-card__label">Active</div>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <div class="table-header">
+            <div class="table-title">User Accounts</div>
+            <input type="search" id="searchUsers" class="table-search" placeholder="🔍  Search by name or email…" />
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>User</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th>Created</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="userTableBody">
+              <tr><td colspan="5" class="loading-row"><span class="spinner"></span> Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Right: Create Panel -->
+      <div>
+        <div class="create-panel">
+          <div class="create-panel__title">➕ Create New User</div>
+          <form id="createUserForm" class="sidebar-form" autocomplete="off">
+            <div class="form-group">
+              <label class="form-label">Full Name</label>
+              <input type="text" id="newName" class="form-input" placeholder="e.g. Juan dela Cruz" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Email Address</label>
+              <input type="email" id="newEmail" class="form-input" placeholder="user@example.com" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Password</label>
+              <input type="password" id="newPassword" class="form-input" placeholder="Min. 6 characters" required minlength="6" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Role</label>
+              <select id="newRole" class="form-select">
+                <option value="user">User</option>
+                <option value="admin">Admin</option>
+              </select>
+            </div>
+            <button type="submit" class="btn btn--primary btn--full">Create User</button>
+          </form>
+        </div>
+
+        <div class="create-panel" style="margin-top:16px;background:var(--accent-dim);border-color:rgba(240,165,0,0.25);">
+          <div class="create-panel__title" style="color:var(--accent);border-color:rgba(240,165,0,0.25);">ℹ Quick Reference</div>
+          <ul style="font-size:0.82rem;color:var(--text-muted);display:flex;flex-direction:column;gap:8px;list-style:none;">
+            <li>🟡 <strong style="color:var(--text);">Admin</strong> — Full access to manage users and all items.</li>
+            <li>🟢 <strong style="color:var(--text);">User</strong> — Can report, search, and claim lost/found items.</li>
+            <li>🔴 <strong style="color:var(--text);">Inactive</strong> — Account is locked; user cannot log in.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── STATS TAB ──────────────────────────────────────────────────────────── -->
+  <div id="statsPanel" class="tab-panel">
+    <div style="padding:28px;">
+
+      <!-- Overview Stats -->
+      <div class="stats-overview" id="statsOverview">
+        <div class="stat-card"><div class="stat-card__value" id="s_total">—</div><div class="stat-card__label">Total Items</div></div>
+        <div class="stat-card"><div class="stat-card__value" id="s_lost" style="color:var(--lost)">—</div><div class="stat-card__label">Lost</div></div>
+        <div class="stat-card"><div class="stat-card__value" id="s_found" style="color:var(--found)">—</div><div class="stat-card__label">Found</div></div>
+        <div class="stat-card"><div class="stat-card__value" id="s_open" style="color:var(--accent)">—</div><div class="stat-card__label">Open</div></div>
+        <div class="stat-card"><div class="stat-card__value" id="s_claimed">—</div><div class="stat-card__label">Claimed</div></div>
+        <div class="stat-card"><div class="stat-card__value" id="s_resolved" style="color:var(--found)">—</div><div class="stat-card__label">Resolved</div></div>
+      </div>
+
+      <!-- Charts -->
+      <div class="charts-row">
+        <div class="chart-box">
+          <div class="chart-box__title">Items by Category</div>
+          <div class="bar-chart" id="categoryChart">
+            <div class="loading-state" style="padding:20px"><span class="spinner"></span></div>
+          </div>
+        </div>
+        <div class="chart-box">
+          <div class="chart-box__title">Status Distribution</div>
+          <div class="donut-wrap" id="statusChart">
+            <div class="loading-state" style="padding:20px"><span class="spinner"></span></div>
+          </div>
+        </div>
+        <div class="chart-box chart-box--wide">
+          <div class="chart-box__title">Items Reported — Last 7 Days</div>
+          <div class="line-chart" id="dayChart">
+            <div class="loading-state" style="padding:20px"><span class="spinner"></span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Export -->
+      <div class="section-title" style="margin-bottom:16px;">📥 Export Reports</div>
+      <div class="export-row">
+        <div class="export-box">
+          <div class="export-box__icon">📊</div>
+          <div>
+            <div class="export-box__title">Export to Excel</div>
+            <div class="export-box__desc">Download all items as a formatted .xlsx spreadsheet</div>
+          </div>
+          <button class="btn btn--primary" onclick="exportFile('excel')">Download Excel</button>
+        </div>
+        <div class="export-box">
+          <div class="export-box__icon">📄</div>
+          <div>
+            <div class="export-box__title">Export to PDF</div>
+            <div class="export-box__desc">Download all items as a formatted PDF report</div>
+          </div>
+          <button class="btn btn--outline" onclick="exportFile('pdf')">Download PDF</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── LOGS TAB ───────────────────────────────────────────────────────────── -->
+  <div id="logsPanel" class="tab-panel">
+    <div style="padding:28px;">
+      <div class="section-header">
+        <div>
+          <div class="section-title">Activity Log</div>
+          <div class="section-subtitle">All user actions across the system</div>
+        </div>
+      </div>
+      <div id="logsContent">
+        <div class="loading-state"><span class="spinner spinner--lg"></span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Edit User Modal ────────────────────────────────────────────────────── -->
+  <div id="editModal" class="modal">
+    <div class="modal__box">
+      <div class="modal__header">
+        <span class="modal__title">✏️ Edit User</span>
+        <button id="closeModal" class="modal__close">✕</button>
+      </div>
+      <form id="editForm">
+        <div class="modal__body">
+          <input type="hidden" id="editId" />
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Full Name</label>
+              <input type="text" id="editName" class="form-input" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Email</label>
+              <input type="email" id="editEmail" class="form-input" required />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Role</label>
+              <select id="editRole" class="form-select">
+                <option value="user">User</option>
+                <option value="admin">Admin</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">New Password</label>
+              <input type="password" id="editPassword" class="form-input" placeholder="Leave blank to keep" minlength="6" />
+            </div>
+          </div>
+          <div class="form-group">
+            <div class="checkbox-group">
+              <input type="checkbox" id="editActive" />
+              <label for="editActive" class="checkbox-label">Account is Active</label>
+            </div>
+          </div>
+        </div>
+        <div class="modal__footer">
+          <button type="button" class="btn btn--outline" onclick="document.getElementById('editModal').classList.remove('modal--visible')">Cancel</button>
+          <button type="submit" class="btn btn--primary">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="/js/app.js"></script>
+  <script src="/js/admin.js"></script>
+</body>
+</html>
